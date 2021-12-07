@@ -123,7 +123,7 @@ fn parse_movements_with_aim<'a>(lines: impl Iterator<Item = &'a str>) -> Result<
 }
 
 fn parse_movement(line: &str) -> Result<Movement> {
-    let mut split = line.split(" ");
+    let mut split = line.split(' ');
     let direction = match split.next() {
         None => return Err(Box::new(Day2Error("No direction element in line".into()))),
         Some(val) => match val {
@@ -136,11 +136,7 @@ fn parse_movement(line: &str) -> Result<Movement> {
                     distance: 0,
                 })
             }
-            other => {
-                return Err(Box::new(Day2Error(
-                    format!("Unknown direction: {}", other).into(),
-                )))
-            }
+            other => return Err(Box::new(Day2Error(format!("Unknown direction: {}", other)))),
         },
     };
 

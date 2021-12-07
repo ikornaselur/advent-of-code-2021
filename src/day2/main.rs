@@ -32,8 +32,8 @@ struct Movement {
 
 #[derive(Debug, PartialEq, Eq)]
 struct Position {
-    horizontal: i32, // Horizontal
-    depth: i32,      // Depth
+    horizontal: i32,
+    depth: i32,
 }
 
 fn main() -> Result<()> {
@@ -63,9 +63,11 @@ fn part2() -> Result<()> {
     file.read_to_string(&mut contents)?;
     let lines = contents.split('\n');
 
-    let part2 = 0;
+    let position = parse_movements_with_aim(lines)?;
 
-    println!("Day 1 - Part 2: {}", part2);
+    let part2 = position.horizontal * position.depth;
+
+    println!("Day 2 - Part 2: {}", part2);
 
     Ok(())
 }
@@ -90,6 +92,37 @@ fn parse_movements<'a>(lines: impl Iterator<Item = &'a str>) -> Result<Position>
                 direction: Direction::Up,
                 distance,
             }) => position.depth -= distance,
+            Err(e) => return Err(e),
+        }
+    }
+
+    Ok(position)
+}
+
+fn parse_movements_with_aim<'a>(lines: impl Iterator<Item = &'a str>) -> Result<Position> {
+    let mut position = Position {
+        horizontal: 0,
+        depth: 0,
+    };
+    let mut aim = 0;
+
+    for line in lines {
+        match parse_movement(line) {
+            Ok(Movement {
+                direction: Direction::Forward,
+                distance,
+            }) => {
+                position.horizontal += distance;
+                position.depth += distance * aim;
+            }
+            Ok(Movement {
+                direction: Direction::Down,
+                distance,
+            }) => aim += distance,
+            Ok(Movement {
+                direction: Direction::Up,
+                distance,
+            }) => aim -= distance,
             Err(e) => return Err(e),
         }
     }
@@ -159,11 +192,18 @@ mod day2 {
                 distance: 500,
             }
         );
+
+        assert_eq!(
+            parse_movement("").unwrap(),
+            Movement {
+                direction: Direction::Forward,
+                distance: 0,
+            }
+        );
     }
 
     #[test]
     fn test_parse_movement_invalid() {
-        assert!(parse_movement("").is_err());
         assert!(parse_movement("forward forward").is_err());
         assert!(parse_movement("forward").is_err());
         assert!(parse_movement("sideways 4").is_err());
@@ -186,7 +226,29 @@ mod day2 {
             position,
             Position {
                 horizontal: 15,
-                depth: 10
+                depth: 10,
+            }
+        );
+    }
+
+    #[test]
+    fn test_parse_movements_with_aim() {
+        let lines = vec![
+            "forward 5",
+            "down 5",
+            "forward 8",
+            "up 3",
+            "down 8",
+            "forward 2",
+        ];
+
+        let position = parse_movements_with_aim(lines.into_iter()).unwrap();
+
+        assert_eq!(
+            position,
+            Position {
+                horizontal: 15,
+                depth: 60,
             }
         );
     }

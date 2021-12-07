@@ -7,34 +7,27 @@ type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 const INPUT: &str = "src/day1/input.txt";
 
 fn main() -> Result<()> {
-    part1()?;
-    part2()?;
+    println!("Day 1 - Part 1: {}", part1()?);
+    println!("Day 1 - Part 2: {}", part2()?);
     Ok(())
 }
 
-fn part1() -> Result<()> {
+fn part1() -> Result<usize> {
     let mut file = File::open(INPUT)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
     let lines = contents.split('\n');
 
-    let part1 = count_increases(lines)?;
-
-    println!("Day 1 - Part 1: {}", part1);
-
-    Ok(())
+    count_increases(lines)
 }
-fn part2() -> Result<()> {
+
+fn part2() -> Result<usize> {
     let mut file = File::open(INPUT)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
     let lines = contents.split('\n');
 
-    let part2 = count_increases_window(lines, 3)?;
-
-    println!("Day 1 - Part 2: {}", part2);
-
-    Ok(())
+    count_increases_window(lines, 3)
 }
 
 fn count_increases<'a>(mut lines: impl Iterator<Item = &'a str>) -> Result<usize> {
@@ -120,5 +113,15 @@ mod day1 {
         ];
 
         assert_eq!(count_increases_window(input.into_iter(), 3).unwrap(), 5);
+    }
+
+    #[test]
+    fn test_part1() {
+        assert_eq!(part1().unwrap(), 1709);
+    }
+
+    #[test]
+    fn test_part2() {
+        assert_eq!(part2().unwrap(), 1761);
     }
 }

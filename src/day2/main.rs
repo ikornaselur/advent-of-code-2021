@@ -37,12 +37,12 @@ struct Position {
 }
 
 fn main() -> Result<()> {
-    part1()?;
-    part2()?;
+    println!("Day 2 - Part 1: {}", part1()?);
+    println!("Day 2 - Part 2: {}", part2()?);
     Ok(())
 }
 
-fn part1() -> Result<()> {
+fn part1() -> Result<i32> {
     let mut file = File::open(INPUT)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
@@ -50,14 +50,10 @@ fn part1() -> Result<()> {
 
     let position = parse_movements(lines)?;
 
-    let part1 = position.horizontal * position.depth;
-
-    println!("Day 2 - Part 1: {}", part1);
-
-    Ok(())
+    Ok(position.horizontal * position.depth)
 }
 
-fn part2() -> Result<()> {
+fn part2() -> Result<i32> {
     let mut file = File::open(INPUT)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
@@ -65,11 +61,7 @@ fn part2() -> Result<()> {
 
     let position = parse_movements_with_aim(lines)?;
 
-    let part2 = position.horizontal * position.depth;
-
-    println!("Day 2 - Part 2: {}", part2);
-
-    Ok(())
+    Ok(position.horizontal * position.depth)
 }
 
 fn parse_movements<'a>(lines: impl Iterator<Item = &'a str>) -> Result<Position> {
@@ -251,5 +243,15 @@ mod day2 {
                 depth: 60,
             }
         );
+    }
+
+    #[test]
+    fn test_part1() {
+        assert_eq!(part1().unwrap(), 2187380);
+    }
+
+    #[test]
+    fn test_part2() {
+        assert_eq!(part2().unwrap(), 2086357770);
     }
 }

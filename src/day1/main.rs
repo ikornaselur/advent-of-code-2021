@@ -4,15 +4,31 @@ use std::io::prelude::*;
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
-fn main() -> Result<()> {
-    let mut file = File::open("src/day1/input.txt")?;
-    let mut contents = String::new();
+const INPUT: &str = "src/day1/input.txt";
 
+fn main() -> Result<()> {
+    part1()?;
+    part2()?;
+    Ok(())
+}
+
+fn part1() -> Result<()> {
+    let mut file = File::open(INPUT)?;
+    let mut contents = String::new();
     file.read_to_string(&mut contents)?;
     let lines = contents.split('\n');
-    let part1 = count_increases(lines.clone())?;
+
+    let part1 = count_increases(lines)?;
 
     println!("Day 1 - Part 1: {}", part1);
+
+    Ok(())
+}
+fn part2() -> Result<()> {
+    let mut file = File::open(INPUT)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    let lines = contents.split('\n');
 
     let part2 = count_increases_window(lines, 3)?;
 

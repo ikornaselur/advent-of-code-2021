@@ -1,0 +1,48 @@
+use std::error;
+use std::fs::File;
+use std::io::prelude::*;
+
+type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
+
+const INPUT: &str = "src/day0/input.txt";
+
+fn main() -> Result<()> {
+    part1()?;
+    part2()?;
+    Ok(())
+}
+
+fn part1() -> Result<()> {
+    let mut file = File::open(INPUT)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    let lines = contents.split('\n');
+
+    let part1 = 0;
+
+    println!("Day 1 - Part 1: {}", part1);
+
+    Ok(())
+}
+fn part2() -> Result<()> {
+    let mut file = File::open(INPUT)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    let lines = contents.split('\n');
+
+    let part2 = 0;
+
+    println!("Day 1 - Part 2: {}", part2);
+
+    Ok(())
+}
+
+#[cfg(test)]
+mod day0 {
+    use super::*;
+
+    #[test]
+    fn test_thing() {
+        assert_eq!(1 + 1, 2);
+    }
+}

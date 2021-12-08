@@ -41,7 +41,10 @@ fn part2() -> Result<i32> {
     file.read_to_string(&mut contents)?;
     let lines = contents.split('\n');
 
-    Ok(0)
+    let oxygen_generator_rating = boil_to_one(lines.clone(), true)?;
+    let co2_scrubber_rating = boil_to_one(lines, false)?;
+
+    Ok(oxygen_generator_rating * co2_scrubber_rating)
 }
 
 /// Go through a list of bits and calculate the counts of ones and zeroes. Rather then storing the
@@ -92,6 +95,83 @@ fn calculate_gamma_epsilon(bit_counts: Vec<i32>) -> Result<(i32, i32)> {
     Ok((gamma, epsilon))
 }
 
+/// Take in an iterator of bit values and "boil" it down to one row, following the rules specified
+/// in Day 3 Part 2.
+/// This will be done by first getting the bit count for the whole list, then using that we can
+/// decide what we are going to discard from the list at every pass, until we get down to one item.
+fn boil_to_one<'a>(lines: impl Iterator<Item = &'a str>, keep_most_common: bool) -> Result<i32> {
+    // Start by creating a bit count and vector list of lines
+    let mut iter = lines.peekable();
+
+    let length = match iter.peek() {
+        Some(&val) => val.len(),
+        None => return Err(Box::new(Day3Error("No elements to process".into()))),
+    };
+
+    let mut counts = vec![0; length];
+    let mut items = Vec::new();
+
+    for line in iter {
+        for (idx, char) in line.chars().enumerate() {
+            match char {
+                '1' => counts[idx] += 1,
+                '0' => counts[idx] -= 1,
+                _ => continue,
+            }
+        }
+        items.push(line);
+    }
+
+    // Start removing items from the list until we reach just one item
+
+    // The bit index to make decisions on
+    let mut idx = 0;
+    while items.len() > 1 {
+        let most_common = if counts[idx] >= 0 { '1' } else { '0' };
+
+        items = items
+            .into_iter()
+            .filter(|item| {
+                let chars = item.chars().collect::<Vec<char>>();
+                if chars.is_empty() {
+                    return false;
+                }
+
+                let is_most_common = chars[idx] == most_common;
+
+                if is_most_common ^ keep_most_common {
+                    // Need to adjust the bit counts
+                    for (char_idx, char) in chars.into_iter().enumerate() {
+                        match char {
+                            '1' => counts[char_idx] -= 1,
+                            '0' => counts[char_idx] += 1,
+                            _ => continue,
+                        }
+                    }
+                    false
+                } else {
+                    true
+                }
+            })
+            .collect();
+
+        // Wrap around if needed
+        idx = (idx + 1) % length;
+    }
+
+    // Convert bits to int
+    let mut result = 0;
+    let mut val = 1;
+    for bit in items[0].chars().rev() {
+        if bit == '1' {
+            result += val;
+        }
+        val *= 2;
+    }
+
+    Ok(result)
+}
+
 #[cfg(test)]
 mod day3 {
     use super::*;
@@ -118,12 +198,34 @@ mod day3 {
     }
 
     #[test]
+    fn test_boil_to_one_keep_most_common() {
+        let lines = vec![
+            "00100", "11110", "10110", "10111", "10101", "01111", "00111", "11100", "10000",
+            "11001", "00010", "01010",
+        ]
+        .into_iter();
+
+        assert_eq!(boil_to_one(lines, true).unwrap(), 23);
+    }
+
+    #[test]
+    fn test_boil_to_one_keep_least_common() {
+        let lines = vec![
+            "00100", "11110", "10110", "10111", "10101", "01111", "00111", "11100", "10000",
+            "11001", "00010", "01010",
+        ]
+        .into_iter();
+
+        assert_eq!(boil_to_one(lines, false).unwrap(), 10);
+    }
+
+    #[test]
     fn test_part1() {
         assert_eq!(part1().unwrap(), 3882564);
     }
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2().unwrap(), 0);
+        assert_eq!(part2().unwrap(), 3385170);
     }
 }

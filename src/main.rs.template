@@ -32,6 +32,7 @@ fn part1() -> Result<i32> {
 
     Ok(0)
 }
+
 fn part2() -> Result<i32> {
     let mut file = File::open(INPUT)?;
     let mut contents = String::new();

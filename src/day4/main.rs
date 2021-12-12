@@ -58,7 +58,7 @@ fn part1() -> Result<i32> {
     }
 
     loop {
-        // Play the draws
+        // Play the draws until first win
         let draw = draws.next().unwrap();
         for card in cards.iter_mut() {
             card.check(draw);
@@ -73,9 +73,63 @@ fn part2() -> Result<i32> {
     let mut file = File::open(INPUT)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
-    let _lines = contents.split('\n');
+    let mut lines = contents.split('\n');
 
-    Ok(0)
+    // First line is moves
+    let mut draws = lines
+        .next()
+        .unwrap()
+        .split(',')
+        .map(|draw| draw.parse::<i32>().unwrap());
+
+    // Skip the empty line before cards start
+    lines.next().unwrap();
+
+    let mut cards: Vec<Card> = vec![];
+
+    let mut lines_peekable = lines.peekable();
+    while lines_peekable.peek().is_some() {
+        // Get 5 lines for the card
+        cards.push(Card::from(
+            lines_peekable
+                .by_ref()
+                .take(5)
+                .collect::<Vec<&str>>()
+                .join("\n")
+                .as_str(),
+        ));
+
+        // Skip the empty line that follows
+        lines_peekable.next().unwrap();
+    }
+
+    let card_count = cards.len();
+    let mut last_board_idx: Option<usize> = None;
+
+    loop {
+        // Play the draws until last win
+        let draw = draws.next().unwrap();
+        for card in cards.iter_mut() {
+            card.check(draw);
+        }
+        let total_wins = cards.iter().filter(|card| card.won()).count();
+        if total_wins == card_count - 1 && last_board_idx.is_none() {
+            // We have all except one winning cards, figure out which one is the last one
+            last_board_idx = Some(
+                cards
+                    .iter()
+                    .enumerate()
+                    .find(|(_idx, card)| !card.won())
+                    .unwrap()
+                    .0,
+            )
+        }
+        if let Some(idx) = last_board_idx {
+            if cards[idx].won() {
+                return Ok(cards[idx].unchecked_sum() * draw);
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -195,7 +249,7 @@ mod day4 {
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2().unwrap(), 0);
+        assert_eq!(part2().unwrap(), 5586);
     }
 
     #[test]
